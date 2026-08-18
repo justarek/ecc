@@ -35,6 +35,10 @@ body {
   color: var(--foreground);
 }
 
+html[dir="rtl"] body {
+  font-family: var(--font-noto-arabic), var(--font-geist-sans), sans-serif;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

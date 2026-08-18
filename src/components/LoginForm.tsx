@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { loginAction, type AuthActionState } from "@/app/actions/auth";
 
 export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
@@ -9,6 +10,7 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
     loginAction,
     null
   );
+  const t = useTranslations("auth");
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -20,7 +22,7 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
       <div>
         <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
-          Email
+          {t("email")}
         </label>
         <input
           id="email"
@@ -36,7 +38,7 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
       <div>
         <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
-          Password
+          {t("password")}
         </label>
         <input
           id="password"
@@ -55,18 +57,18 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
         disabled={pending}
         className="mt-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
       >
-        {pending ? "Logging in..." : "Log in"}
+        {pending ? t("loggingIn") : t("login")}
       </button>
 
       <p className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{" "}
+        {t("noAccount")}{" "}
         <Link href="/register" className="font-medium text-primary hover:underline">
-          Sign up
+          {t("signUp")}
         </Link>
       </p>
 
       <div className="mt-2 rounded-lg bg-surface-muted p-3 text-xs text-muted-foreground">
-        <p className="font-semibold text-foreground">Demo accounts</p>
+        <p className="font-semibold text-foreground">{t("demoAccounts")}</p>
         <p>admin@example.com / Admin@12345</p>
         <p>agent@example.com / Agent@12345</p>
         <p>buyer@example.com / User@12345</p>

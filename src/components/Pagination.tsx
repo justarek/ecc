@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 function buildHref(basePath: string, params: URLSearchParams, page: number) {
   const next = new URLSearchParams(params);
   next.set("page", String(page));
@@ -15,6 +17,8 @@ export default function Pagination({
   page: number;
   pageCount: number;
 }) {
+  const t = useTranslations("listingsPage");
+
   if (pageCount <= 1) return null;
 
   const params = new URLSearchParams();
@@ -40,7 +44,7 @@ export default function Pagination({
           page <= 1 ? "pointer-events-none text-muted-foreground/50" : "text-foreground hover:bg-surface-muted"
         }`}
       >
-        Prev
+        {t("prev")}
       </a>
 
       {pages.map((p, i) => (
@@ -68,7 +72,7 @@ export default function Pagination({
           page >= pageCount ? "pointer-events-none text-muted-foreground/50" : "text-foreground hover:bg-surface-muted"
         }`}
       >
-        Next
+        {t("next")}
       </a>
     </nav>
   );

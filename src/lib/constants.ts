@@ -3,23 +3,31 @@ export type City = {
   name: string;
   nameAr: string;
   region: string;
+  lat: number;
+  lng: number;
 };
 
 // New/planned cities in Egypt where units and land are actively sold.
+// Coordinates are approximate city-center points, used to default the map
+// view when posting a listing or browsing the map.
 export const CITIES: City[] = [
-  { slug: "new-cairo", name: "New Cairo", nameAr: "القاهرة الجديدة", region: "Greater Cairo" },
-  { slug: "new-administrative-capital", name: "New Administrative Capital", nameAr: "العاصمة الإدارية الجديدة", region: "Greater Cairo" },
-  { slug: "6th-of-october", name: "6th of October City", nameAr: "مدينة 6 أكتوبر", region: "Greater Cairo" },
-  { slug: "sheikh-zayed", name: "Sheikh Zayed City", nameAr: "مدينة الشيخ زايد", region: "Greater Cairo" },
-  { slug: "new-alamein", name: "New Alamein", nameAr: "العلمين الجديدة", region: "North Coast" },
-  { slug: "mostakbal-city", name: "Mostakbal City", nameAr: "مدينة المستقبل", region: "Greater Cairo" },
-  { slug: "el-shorouk", name: "El Shorouk City", nameAr: "مدينة الشروق", region: "Greater Cairo" },
-  { slug: "badya", name: "Badya", nameAr: "بادية", region: "Greater Cairo" },
-  { slug: "new-mansoura", name: "New Mansoura", nameAr: "المنصورة الجديدة", region: "Delta" },
-  { slug: "new-cairo-city-r7", name: "New Heliopolis", nameAr: "هليوبوليس الجديدة", region: "Greater Cairo" },
-  { slug: "new-obour", name: "New Obour", nameAr: "العبور الجديدة", region: "Greater Cairo" },
-  { slug: "new-aswan", name: "New Aswan", nameAr: "أسوان الجديدة", region: "Upper Egypt" },
+  { slug: "new-cairo", name: "New Cairo", nameAr: "القاهرة الجديدة", region: "Greater Cairo", lat: 30.03, lng: 31.49 },
+  { slug: "new-administrative-capital", name: "New Administrative Capital", nameAr: "العاصمة الإدارية الجديدة", region: "Greater Cairo", lat: 30.01, lng: 31.7 },
+  { slug: "6th-of-october", name: "6th of October City", nameAr: "مدينة 6 أكتوبر", region: "Greater Cairo", lat: 29.94, lng: 30.92 },
+  { slug: "sheikh-zayed", name: "Sheikh Zayed City", nameAr: "مدينة الشيخ زايد", region: "Greater Cairo", lat: 30.01, lng: 30.94 },
+  { slug: "new-alamein", name: "New Alamein", nameAr: "العلمين الجديدة", region: "North Coast", lat: 30.83, lng: 28.95 },
+  { slug: "mostakbal-city", name: "Mostakbal City", nameAr: "مدينة المستقبل", region: "Greater Cairo", lat: 30.05, lng: 31.55 },
+  { slug: "el-shorouk", name: "El Shorouk City", nameAr: "مدينة الشروق", region: "Greater Cairo", lat: 30.13, lng: 31.62 },
+  { slug: "badya", name: "Badya", nameAr: "بادية", region: "Greater Cairo", lat: 30.03, lng: 30.85 },
+  { slug: "new-mansoura", name: "New Mansoura", nameAr: "المنصورة الجديدة", region: "Delta", lat: 31.13, lng: 31.66 },
+  { slug: "new-cairo-city-r7", name: "New Heliopolis", nameAr: "هليوبوليس الجديدة", region: "Greater Cairo", lat: 30.13, lng: 31.53 },
+  { slug: "new-obour", name: "New Obour", nameAr: "العبور الجديدة", region: "Greater Cairo", lat: 30.23, lng: 31.47 },
+  { slug: "new-aswan", name: "New Aswan", nameAr: "أسوان الجديدة", region: "Upper Egypt", lat: 24.09, lng: 32.9 },
 ];
+
+export function cityBySlug(slug: string) {
+  return CITIES.find((c) => c.slug === slug);
+}
 
 export const CATEGORIES = [
   { value: "UNIT", label: "Units" },
@@ -81,8 +89,10 @@ export function propertyTypeLabel(value: string) {
   return PROPERTY_TYPES.find((t) => t.value === value)?.label ?? value;
 }
 
-export function cityLabel(slug: string) {
-  return CITIES.find((c) => c.slug === slug)?.name ?? slug;
+export function cityLabel(slug: string, locale: string = "en") {
+  const city = CITIES.find((c) => c.slug === slug);
+  if (!city) return slug;
+  return locale === "ar" ? city.nameAr : city.name;
 }
 
 export function formatPrice(price: number, currency: string) {

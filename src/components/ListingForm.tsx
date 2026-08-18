@@ -1,9 +1,13 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { AMENITIES, CATEGORIES, CITIES, CURRENCIES, PROPERTY_TYPES, PURPOSES } from "@/lib/constants";
+import { useLocale, useTranslations } from "next-intl";
+import { AMENITIES, CATEGORIES, CITIES, CURRENCIES, PROPERTY_TYPES, PURPOSES, cityBySlug } from "@/lib/constants";
 import type { ListingActionState } from "@/app/actions/listings";
 import { deleteListingImageAction } from "@/app/actions/listings";
+import LocationPicker from "@/components/map/LocationPicker";
+
+const DEFAULT_CENTER: [number, number] = [30.0444, 31.2357]; // Cairo
 
 type Action = (prevState: ListingActionState, formData: FormData) => Promise<ListingActionState>;
 
@@ -24,6 +28,8 @@ export type ListingFormInitialValues = {
   compound?: string | null;
   address?: string | null;
   amenities?: string[];
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export default function ListingForm({
@@ -39,13 +45,22 @@ export default function ListingForm({
 }) {
   const [state, formAction, pending] = useActionState<ListingActionState, FormData>(action, null);
   const [category, setCategory] = useState(initialValues?.category ?? "UNIT");
+  const [city, setCity] = useState(initialValues?.city ?? "");
   const [previews, setPreviews] = useState<string[]>([]);
   const [images, setImages] = useState(existingImages ?? []);
+  const t = useTranslations("listingForm");
+  const tOptions = useTranslations("options");
+  const locale = useLocale();
 
   const propertyTypes = useMemo(
     () => PROPERTY_TYPES.filter((t) => t.category === category),
     [category]
   );
+
+  const cityCenter = useMemo((): [number, number] => {
+    const match = cityBySlug(city);
+    return match ? [match.lat, match.lng] : DEFAULT_CENTER;
+  }, [city]);
 
   function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -69,15 +84,15 @@ export default function ListingForm({
       )}
 
       <section className="rounded-2xl border border-border bg-surface p-5">
-        <h2 className="text-sm font-semibold text-foreground">Basic information</h2>
+        <h2 className="text-sm font-semibold text-foreground">{t("basicInfo")}</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-foreground">Title</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">{t("title")}</label>
             <input
               name="title"
               defaultValue={initialValues?.title}
               required
-              placeholder="e.g. Modern 3BR Apartment in Mivida, New Cairo"
+              placeholder={t("titlePlaceholder")}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
             {state?.fieldErrors?.title && (
@@ -86,13 +101,15 @@ export default function ListingForm({
           </div>
 
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-foreground">Description</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">
+              {t("description")}
+            </label>
             <textarea
               name="description"
               defaultValue={initialValues?.description}
               required
               rows={5}
-              placeholder="Describe the property, finishing, location advantages, and payment terms."
+              placeholder={t("descriptionPlaceholder")}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
             {state?.fieldErrors?.description && (
@@ -101,7 +118,9 @@ export default function ListingForm({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Category</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">
+              {t("category")}
+            </label>
             <select
               name="category"
               value={category}
@@ -110,30 +129,34 @@ export default function ListingForm({
             >
               {CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>
-                  {c.label}
+                  {tOptions(`category.${c.value}`)}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Property type</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">
+              {t("propertyType")}
+            </label>
             <select
               name="propertyType"
               defaultValue={initialValues?.propertyType}
               required
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             >
-              {propertyTypes.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
+              {propertyTypes.map((pt) => (
+                <option key={pt.value} value={pt.value}>
+                  {tOptions(`propertyType.${pt.value}`)}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Purpose</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">
+              {t("purpose")}
+            </label>
             <select
               name="purpose"
               defaultValue={initialValues?.purpose ?? "SALE"}
@@ -141,24 +164,25 @@ export default function ListingForm({
             >
               {PURPOSES.map((p) => (
                 <option key={p.value} value={p.value}>
-                  {p.label}
+                  {tOptions(`purpose.${p.value}`)}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">City</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">{t("city")}</label>
             <select
               name="city"
-              defaultValue={initialValues?.city}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
               required
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             >
-              <option value="">Select a city</option>
+              <option value="">{t("selectCity")}</option>
               {CITIES.map((c) => (
                 <option key={c.slug} value={c.slug}>
-                  {c.name}
+                  {locale === "ar" ? c.nameAr : c.name}
                 </option>
               ))}
             </select>
@@ -170,10 +194,10 @@ export default function ListingForm({
       </section>
 
       <section className="rounded-2xl border border-border bg-surface p-5">
-        <h2 className="text-sm font-semibold text-foreground">Pricing &amp; size</h2>
+        <h2 className="text-sm font-semibold text-foreground">{t("pricingSize")}</h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Price</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">{t("price")}</label>
             <input
               name="price"
               type="number"
@@ -189,7 +213,9 @@ export default function ListingForm({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Currency</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">
+              {t("currency")}
+            </label>
             <select
               name="currency"
               defaultValue={initialValues?.currency ?? "EGP"}
@@ -204,7 +230,7 @@ export default function ListingForm({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Area (m²)</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">{t("area")}</label>
             <input
               name="area"
               type="number"
@@ -220,7 +246,7 @@ export default function ListingForm({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">Floor</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">{t("floor")}</label>
             <input
               name="floor"
               type="number"
@@ -232,7 +258,9 @@ export default function ListingForm({
           {category === "UNIT" && (
             <>
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Bedrooms</label>
+                <label className="mb-1 block text-sm font-medium text-foreground">
+                  {t("bedrooms")}
+                </label>
                 <input
                   name="bedrooms"
                   type="number"
@@ -242,7 +270,9 @@ export default function ListingForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Bathrooms</label>
+                <label className="mb-1 block text-sm font-medium text-foreground">
+                  {t("bathrooms")}
+                </label>
                 <input
                   name="bathrooms"
                   type="number"
@@ -257,11 +287,11 @@ export default function ListingForm({
       </section>
 
       <section className="rounded-2xl border border-border bg-surface p-5">
-        <h2 className="text-sm font-semibold text-foreground">Location</h2>
+        <h2 className="text-sm font-semibold text-foreground">{t("location")}</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-foreground">
-              Compound (optional)
+              {t("compoundOptional")}
             </label>
             <input
               name="compound"
@@ -271,7 +301,7 @@ export default function ListingForm({
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-foreground">
-              District (optional)
+              {t("districtOptional")}
             </label>
             <input
               name="district"
@@ -281,7 +311,7 @@ export default function ListingForm({
           </div>
           <div className="sm:col-span-2">
             <label className="mb-1 block text-sm font-medium text-foreground">
-              Address details (optional)
+              {t("addressOptional")}
             </label>
             <input
               name="address"
@@ -290,11 +320,22 @@ export default function ListingForm({
             />
           </div>
         </div>
+
+        <div className="mt-4">
+          <label className="mb-1 block text-sm font-medium text-foreground">
+            {t("mapLocation")}
+          </label>
+          <LocationPicker
+            initialLat={initialValues?.latitude}
+            initialLng={initialValues?.longitude}
+            cityCenter={cityCenter}
+          />
+        </div>
       </section>
 
       {category === "UNIT" && (
         <section className="rounded-2xl border border-border bg-surface p-5">
-          <h2 className="text-sm font-semibold text-foreground">Amenities</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t("amenities")}</h2>
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {AMENITIES.map((a) => (
               <label key={a} className="flex items-center gap-2 text-sm text-foreground/80">
@@ -305,7 +346,7 @@ export default function ListingForm({
                   defaultChecked={initialValues?.amenities?.includes(a)}
                   className="rounded border-border text-primary focus:ring-primary"
                 />
-                {a}
+                {tOptions(`amenities.${a}`)}
               </label>
             ))}
           </div>
@@ -313,7 +354,7 @@ export default function ListingForm({
       )}
 
       <section className="rounded-2xl border border-border bg-surface p-5">
-        <h2 className="text-sm font-semibold text-foreground">Photos</h2>
+        <h2 className="text-sm font-semibold text-foreground">{t("photos")}</h2>
 
         {images.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-3">
@@ -325,7 +366,7 @@ export default function ListingForm({
                   type="button"
                   onClick={() => handleDeleteExisting(img.id)}
                   className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-xs text-background"
-                  aria-label="Remove photo"
+                  aria-label={t("removePhoto")}
                 >
                   ✕
                 </button>
@@ -336,7 +377,7 @@ export default function ListingForm({
 
         <div className="mt-4">
           <label className="mb-1 block text-sm font-medium text-foreground">
-            {images.length > 0 ? "Add more photos" : "Upload photos"}
+            {images.length > 0 ? t("addMorePhotos") : t("uploadPhotos")}
           </label>
           <input
             name="images"
@@ -346,7 +387,7 @@ export default function ListingForm({
             onChange={handleFilesChange}
             className="w-full rounded-lg border border-dashed border-border px-3 py-4 text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-foreground"
           />
-          <p className="mt-1 text-xs text-muted-foreground">JPEG, PNG, WebP, or AVIF. Up to 8MB each.</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("photoHint")}</p>
         </div>
 
         {previews.length > 0 && (
@@ -364,7 +405,7 @@ export default function ListingForm({
         disabled={pending}
         className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
       >
-        {pending ? "Saving..." : submitLabel}
+        {pending ? t("saving") : submitLabel}
       </button>
     </form>
   );

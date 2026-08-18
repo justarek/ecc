@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { CurrentUser } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
+import LocaleSwitcher from "./LocaleSwitcher";
 
 export default function MobileNav({
   user,
@@ -13,6 +15,7 @@ export default function MobileNav({
   navLinks: { href: string; label: string }[];
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("nav");
 
   return (
     <div className="md:hidden">
@@ -46,21 +49,21 @@ export default function MobileNav({
                   onClick={() => setOpen(false)}
                   className="rounded-lg bg-primary px-3 py-2 text-center text-sm font-semibold text-primary-foreground"
                 >
-                  + Post a listing
+                  {t("postListing")}
                 </Link>
                 <Link
                   href="/dashboard"
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-surface-muted"
                 >
-                  My dashboard
+                  {t("myDashboard")}
                 </Link>
                 <Link
                   href="/favorites"
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-surface-muted"
                 >
-                  Favorites
+                  {t("favorites")}
                 </Link>
                 {user.role === "ADMIN" && (
                   <Link
@@ -68,7 +71,7 @@ export default function MobileNav({
                     onClick={() => setOpen(false)}
                     className="rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-surface-muted"
                   >
-                    Admin
+                    {t("admin")}
                   </Link>
                 )}
                 <form action={logoutAction}>
@@ -76,7 +79,7 @@ export default function MobileNav({
                     type="submit"
                     className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-muted-foreground hover:bg-surface-muted"
                   >
-                    Log out
+                    {t("logout")}
                   </button>
                 </form>
               </>
@@ -87,17 +90,20 @@ export default function MobileNav({
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-surface-muted"
                 >
-                  Log in
+                  {t("login")}
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setOpen(false)}
                   className="rounded-lg bg-primary px-3 py-2 text-center text-sm font-semibold text-primary-foreground"
                 >
-                  Sign up
+                  {t("signup")}
                 </Link>
               </>
             )}
+            <div className="mt-2 border-t border-border pt-3">
+              <LocaleSwitcher />
+            </div>
           </nav>
         </div>
       )}
