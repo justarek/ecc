@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { CITIES } from "@/lib/constants";
 
 export default function Footer() {
   const featuredCities = CITIES.slice(0, 6);
+  const locale = useLocale();
+  const t = useTranslations("footer");
 
   return (
     <footer className="border-t border-border bg-surface-muted">
@@ -17,45 +20,42 @@ export default function Footer() {
                 Dar<span className="text-primary">Masr</span>
               </span>
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Egypt&apos;s marketplace for buying and selling units and land in the new
-              cities — New Cairo, the New Capital, and beyond.
-            </p>
+            <p className="mt-3 text-sm text-muted-foreground">{t("tagline")}</p>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Explore</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t("explore")}</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/listings?category=UNIT" className="hover:text-primary">
-                  Units for sale
+                  {t("unitsForSale")}
                 </Link>
               </li>
               <li>
                 <Link href="/listings?category=LAND" className="hover:text-primary">
-                  Land for sale
+                  {t("landForSale")}
                 </Link>
               </li>
               <li>
                 <Link href="/listings?purpose=RENT" className="hover:text-primary">
-                  Properties for rent
+                  {t("propertiesForRent")}
                 </Link>
               </li>
               <li>
                 <Link href="/listings/new" className="hover:text-primary">
-                  Post a listing
+                  {t("postListing")}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-foreground">New cities</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t("newCities")}</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               {featuredCities.map((city) => (
                 <li key={city.slug}>
                   <Link href={`/listings?city=${city.slug}`} className="hover:text-primary">
-                    {city.name}
+                    {locale === "ar" ? city.nameAr : city.name}
                   </Link>
                 </li>
               ))}
@@ -63,21 +63,21 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Account</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t("account")}</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/login" className="hover:text-primary">
-                  Log in
+                  {t("login")}
                 </Link>
               </li>
               <li>
                 <Link href="/register" className="hover:text-primary">
-                  Create an account
+                  {t("createAccount")}
                 </Link>
               </li>
               <li>
                 <Link href="/dashboard" className="hover:text-primary">
-                  My dashboard
+                  {t("myDashboard")}
                 </Link>
               </li>
             </ul>
@@ -85,8 +85,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} DarMasr. All rights reserved.</p>
-          <p>Built for buyers, sellers, and brokers across Egypt&apos;s new cities.</p>
+          <p>{t("allRightsReserved", { year: new Date().getFullYear() })}</p>
+          <p>{t("builtFor")}</p>
         </div>
       </div>
     </footer>

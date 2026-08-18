@@ -1,15 +1,18 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
 import MobileNav from "./MobileNav";
+import LocaleSwitcher from "./LocaleSwitcher";
 
 export default async function Header() {
   const user = await getCurrentUser();
+  const t = await getTranslations("nav");
 
   const navLinks = [
-    { href: "/listings?category=UNIT", label: "Units" },
-    { href: "/listings?category=LAND", label: "Land" },
-    { href: "/listings?purpose=RENT", label: "Rent" },
+    { href: "/listings?category=UNIT", label: t("units") },
+    { href: "/listings?category=LAND", label: t("land") },
+    { href: "/listings?purpose=RENT", label: t("rent") },
   ];
 
   return (
@@ -33,13 +36,14 @@ export default async function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <LocaleSwitcher />
           {user ? (
             <>
               <Link
                 href="/listings/new"
                 className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-dark transition-colors"
               >
-                + Post a listing
+                {t("postListing")}
               </Link>
               <Link
                 href="/dashboard"
@@ -52,7 +56,7 @@ export default async function Header() {
                   href="/admin"
                   className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted transition-colors"
                 >
-                  Admin
+                  {t("admin")}
                 </Link>
               )}
               <form action={logoutAction}>
@@ -60,7 +64,7 @@ export default async function Header() {
                   type="submit"
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Log out
+                  {t("logout")}
                 </button>
               </form>
             </>
@@ -70,13 +74,13 @@ export default async function Header() {
                 href="/login"
                 className="text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
-                Log in
+                {t("login")}
               </Link>
               <Link
                 href="/register"
                 className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-dark transition-colors"
               >
-                Sign up
+                {t("signup")}
               </Link>
             </>
           )}

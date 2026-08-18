@@ -1,19 +1,23 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
-const OPTIONS = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "price_asc", label: "Price: Low to High" },
-  { value: "price_desc", label: "Price: High to Low" },
-  { value: "area_asc", label: "Area: Low to High" },
-  { value: "area_desc", label: "Area: High to Low" },
-];
+const OPTION_VALUES = ["newest", "oldest", "price_asc", "price_desc", "area_asc", "area_desc"] as const;
+
+const KEY_BY_VALUE: Record<(typeof OPTION_VALUES)[number], string> = {
+  newest: "newest",
+  oldest: "oldest",
+  price_asc: "priceAsc",
+  price_desc: "priceDesc",
+  area_asc: "areaAsc",
+  area_desc: "areaDesc",
+};
 
 export default function SortSelect({ current }: { current?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("sort");
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -32,9 +36,9 @@ export default function SortSelect({ current }: { current?: string }) {
       onChange={handleChange}
       className="rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
     >
-      {OPTIONS.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
+      {OPTION_VALUES.map((value) => (
+        <option key={value} value={value}>
+          {t(KEY_BY_VALUE[value])}
         </option>
       ))}
     </select>
