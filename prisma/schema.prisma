@@ -1,0 +1,109 @@
+// Prisma schema for the Egypt new-cities real estate marketplace.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// SQLite has no native enum type; Prisma stores these as TEXT.
+// Valid values are enforced in application code (see src/lib/constants.ts).
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         String   @default("USER") // USER | AGENT | ADMIN
+  createdAt    DateTime @default(now())
+
+  listings  Listing[]
+  favorites Favorite[]
+  inquiries Inquiry[]
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String // UNIT | LAND
+  propertyType String // APARTMENT | VILLA | TOWNHOUSE | DUPLEX | STUDIO | PENTHOUSE | OFFICE | RETAIL | RESIDENTIAL_LAND | COMMERCIAL_LAND | AGRICULTURAL_LAND
+  purpose     String // SALE | RENT
+  status      String   @default("PENDING") // PENDING | APPROVED | REJECTED
+
+  price      Float
+  currency   String  @default("EGP")
+  area       Float // square meters
+  bedrooms   Int?
+  bathrooms  Int?
+  floor      Int?
+
+  city       String
+  district   String?
+  compound   String?
+  address    String?
+  latitude   Float?
+  longitude  Float?
+
+  amenities  String? // comma-separated list
+
+  featured   Boolean  @default(false)
+  views      Int      @default(0)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  images     Image[]
+  favorites  Favorite[]
+  inquiries  Inquiry[]
+
+  @@index([city])
+  @@index([category])
+  @@index([propertyType])
+  @@index([purpose])
+  @@index([status])
+}
+
+model Image {
+  id        String  @id @default(cuid())
+  url       String
+  position  Int     @default(0)
+
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  message   String
+  createdAt DateTime @default(now())
+
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
