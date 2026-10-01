@@ -145,7 +145,10 @@ export async function deleteListingAction(listingId: string) {
   }
 
   await prisma.listing.delete({ where: { id: listingId } });
-  await Promise.all(existing.images.map((img) => deleteUploadedImage(img.url)));
+  await Promise.all([
+    ...existing.images.map((img) => deleteUploadedImage(img.url)),
+    ...(existing.videoUrl ? [deleteUploadedImage(existing.videoUrl)] : []),
+  ]);
 
   revalidatePath("/listings");
   revalidatePath("/dashboard");

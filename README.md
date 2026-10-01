@@ -25,6 +25,9 @@ Bayut/Dubizzle, scoped to Egypt's new-city development market.
   session cookie (no third-party auth provider required).
 - **Bilingual (English / Arabic)** — full UI translation with a language
   switcher and right-to-left layout for Arabic.
+- **Promo videos (optional)** — listing owners can generate a short narrated
+  video of a listing through a self-hosted
+  [MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) server.
 
 ## Tech stack
 
@@ -110,6 +113,30 @@ Listing photos are uploaded via `src/lib/storage.ts`, which:
   optional S3 variables).
 - Falls back to local disk at `public/uploads/` otherwise, so local
   development works with zero cloud configuration.
+
+## Promo videos (MoneyPrinterTurbo)
+
+DarMasr can render a short, narrated promo video for a listing by calling the
+REST API of a self-hosted [MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo)
+server (`src/lib/moneyprinter.ts`, `src/app/actions/video.ts`).
+
+1. Run MoneyPrinterTurbo's API server (e.g. `docker compose up` in its repo,
+   which serves the API on port 8080) and add a Pexels key to its
+   `config.toml` (`pexels_api_keys`). An LLM key isn't required: DarMasr
+   builds the narration script and stock-footage keywords from the listing's
+   fields, in the viewer's language (English or Arabic).
+2. Set `MONEYPRINTER_API_URL` (and `MONEYPRINTER_API_KEY` if the server has
+   `api_key` set) in `.env`. See `.env.example` for voice, aspect ratio, and
+   font options.
+3. Open one of your listings — owners and admins get a **Promo video** panel
+   with a generate button and a progress bar. When the task finishes, the MP4
+   is copied into DarMasr's photo storage (S3 or `public/uploads/`), shown on
+   the listing page to everyone, and the task is deleted from
+   MoneyPrinterTurbo.
+
+MoneyPrinterTurbo's bundled subtitle fonts don't cover Arabic, so Arabic
+videos are rendered without subtitles unless you drop an Arabic-capable font
+into its `resource/fonts/` directory and set `MONEYPRINTER_ARABIC_FONT`.
 
 ## Notes
 

@@ -114,7 +114,28 @@ export async function saveUploadedImages(files: File[]): Promise<string[]> {
   return urls;
 }
 
-/** Deletes a previously-uploaded image, given the public URL stored on the Image model. */
+/**
+ * Saves a generated video (e.g. a MoneyPrinterTurbo promo video) to the same
+ * storage backend as listing photos and returns its public URL.
+ */
+export async function saveVideoBuffer(buffer: Buffer, contentType = "video/mp4"): Promise<string> {
+  const filename = `${randomUUID()}.${contentType === "video/webm" ? "webm" : "mp4"}`;
+  const s3Config = getS3Config();
+
+  if (s3Config) {
+    const key = `${UPLOAD_PREFIX}/${filename}`;
+    await getS3Client().send(
+      new PutObjectCommand({ Bucket: s3Config.bucket, Key: key, Body: buffer, ContentType: contentType })
+    );
+    return `${s3Config.publicUrlBase}/${key}`;
+  }
+
+  await mkdir(LOCAL_UPLOAD_DIR, { recursive: true });
+  await writeFile(path.join(LOCAL_UPLOAD_DIR, filename), buffer);
+  return `/${UPLOAD_PREFIX}/${filename}`;
+}
+
+/** Deletes a previously-uploaded image (or video), given the public URL stored on the Image model. */
 export async function deleteUploadedImage(url: string): Promise<void> {
   const s3Config = getS3Config();
 

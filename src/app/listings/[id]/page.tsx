@@ -11,6 +11,8 @@ import FavoriteButton from "@/components/FavoriteButton";
 import InquiryForm from "@/components/InquiryForm";
 import ListingCard from "@/components/ListingCard";
 import ListingMap from "@/components/map/ListingMap";
+import ListingVideoPanel from "@/components/ListingVideoPanel";
+import { isMoneyPrinterConfigured } from "@/lib/moneyprinter";
 
 async function getListing(id: string) {
   const listing = await prisma.listing.findUnique({
@@ -142,6 +144,32 @@ export default async function ListingDetailPage({ params }: PageProps<"/listings
               </div>
             ))}
           </div>
+
+          {(isOwner || isAdmin) && (isMoneyPrinterConfigured() || listing.videoUrl) ? (
+            <div className="mt-6">
+              <ListingVideoPanel
+                listingId={listing.id}
+                initialState={{
+                  status: listing.videoStatus,
+                  progress: listing.videoProgress,
+                  videoUrl: listing.videoUrl,
+                  error: listing.videoError,
+                }}
+              />
+            </div>
+          ) : (
+            listing.videoUrl && (
+              <div className="mt-6">
+                <h2 className="text-lg font-bold text-foreground">{t("video")}</h2>
+                <video
+                  src={listing.videoUrl}
+                  controls
+                  preload="metadata"
+                  className="mt-3 max-h-[480px] w-full rounded-xl bg-black"
+                />
+              </div>
+            )
+          )}
 
           <div className="mt-6">
             <h2 className="text-lg font-bold text-foreground">{t("description")}</h2>

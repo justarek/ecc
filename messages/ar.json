@@ -102,6 +102,7 @@
     "floor": "الدور",
     "compound": "الكمبوند",
     "city": "المدينة",
+    "video": "جولة بالفيديو",
     "description": "الوصف",
     "amenities": "المرافق",
     "location": "الموقع",
@@ -293,5 +294,26 @@
     "label": "اللغة",
     "en": "English",
     "ar": "العربية"
+  },
+  "listingVideo": {
+    "title": "فيديو ترويجي",
+    "description": "أنشئ فيديو قصيرًا مع تعليق صوتي لهذا الإعلان باستخدام MoneyPrinterTurbo، جاهزًا لوسائل التواصل الاجتماعي.",
+    "generate": "إنشاء فيديو ترويجي",
+    "regenerate": "إعادة إنشاء الفيديو",
+    "starting": "جارٍ البدء...",
+    "generating": "جارٍ إنشاء الفيديو... {progress}%",
+    "generatingHint": "يستغرق ذلك عادةً بضع دقائق. يمكنك مغادرة هذه الصفحة والعودة لاحقًا.",
+    "failed": "تعذّر إنشاء الفيديو.",
+    "unreachable": "تعذّر التحقق من حالة الفيديو الآن. جارٍ إعادة المحاولة...",
+    "script": {
+      "intro": "اكتشف هذا العقار: {type} {purpose, select, SALE {للبيع} other {للإيجار}} في {city}.",
+      "compound": "يقع في {compound}.",
+      "area": "بمساحة {area} متر مربع.",
+      "bedrooms": "عدد غرف النوم: {count}.",
+      "bathrooms": "عدد الحمامات: {count}.",
+      "amenities": "من أبرز المميزات: {list}.",
+      "price": "{purpose, select, SALE {السعر المطلوب} other {الإيجار الشهري}}: {price} {currency, select, USD {دولار أمريكي} other {جنيه مصري}}.",
+      "outro": "تجده الآن على دار مصر."
+    }
   }
 }

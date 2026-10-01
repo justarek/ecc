@@ -102,6 +102,7 @@
     "floor": "Floor",
     "compound": "Compound",
     "city": "City",
+    "video": "Video tour",
     "description": "Description",
     "amenities": "Amenities",
     "location": "Location",
@@ -293,5 +294,26 @@
     "label": "Language",
     "en": "English",
     "ar": "العربية"
+  },
+  "listingVideo": {
+    "title": "Promo video",
+    "description": "Generate a short narrated video of this listing with MoneyPrinterTurbo, ready for social media.",
+    "generate": "Generate promo video",
+    "regenerate": "Regenerate video",
+    "starting": "Starting...",
+    "generating": "Generating video... {progress}%",
+    "generatingHint": "This usually takes a few minutes. You can leave this page and come back later.",
+    "failed": "Video generation failed.",
+    "unreachable": "Couldn't check on the video right now. Retrying...",
+    "script": {
+      "intro": "Discover this {type} {purpose, select, SALE {for sale} other {for rent}} in {city}.",
+      "compound": "It is located in {compound}.",
+      "area": "It offers {area} square meters of space.",
+      "bedrooms": "It has {count, plural, one {one bedroom} other {# bedrooms}}.",
+      "bathrooms": "It comes with {count, plural, one {one bathroom} other {# bathrooms}}.",
+      "amenities": "Highlights include {list}.",
+      "price": "{purpose, select, SALE {Asking price} other {Monthly rent}}: {price} {currency, select, USD {US dollars} other {Egyptian pounds}}.",
+      "outro": "Find it now on DarMasr."
+    }
   }
 }
