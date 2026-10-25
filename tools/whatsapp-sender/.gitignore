@@ -1,0 +1,6 @@
+.env
+node_modules/
+sent-log.csv
+contacts.xlsx
+*.xlsx
+!contacts.example.xlsx
