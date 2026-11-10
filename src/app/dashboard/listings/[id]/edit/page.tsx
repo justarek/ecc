@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { updateListingAction } from "@/app/actions/listings";
@@ -25,18 +26,18 @@ export default async function EditListingPage({
   if (listing.userId !== user.id && user.role !== "ADMIN") notFound();
 
   const boundAction = updateListingAction.bind(null, listing.id);
+  const t = await getTranslations("editListing");
+  const tForm = await getTranslations("listingForm");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <h1 className="text-2xl font-bold text-foreground">Edit listing</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Changes to an approved listing will be re-reviewed before going live again.
-      </p>
+      <h1 className="text-2xl font-bold text-foreground">{t("title")}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
 
       <div className="mt-8">
         <ListingForm
           action={boundAction}
-          submitLabel="Save changes"
+          submitLabel={tForm("saveChanges")}
           existingImages={listing.images}
           initialValues={{
             title: listing.title,
@@ -54,7 +55,9 @@ export default async function EditListingPage({
             district: listing.district,
             compound: listing.compound,
             address: listing.address,
-            amenities: listing.amenities ? listing.amenities.split(",") : [],
+            amenities: listing.amenities,
+            latitude: listing.latitude,
+            longitude: listing.longitude,
           }}
         />
       </div>

@@ -43,10 +43,6 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# database
-/dev.db
-/dev.db-journal
-
-# user-uploaded listing photos
+# user-uploaded listing photos (local-disk fallback storage)
 /public/uploads/*
 !/public/uploads/.gitkeep

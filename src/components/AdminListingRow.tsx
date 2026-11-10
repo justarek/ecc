@@ -3,14 +3,19 @@
 import { useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 import { setListingStatusAction, toggleFeaturedAction } from "@/app/actions/admin";
-import { cityLabel, formatPrice, propertyTypeLabel } from "@/lib/constants";
+import { cityLabel, formatPrice } from "@/lib/constants";
 import StatusBadge from "./StatusBadge";
 import type { ListingCardData } from "@/lib/listings";
 
 export default function AdminListingRow({ listing }: { listing: ListingCardData }) {
   const [isPending, startTransition] = useTransition();
   const image = listing.images[0]?.url;
+  const locale = useLocale();
+  const t = useTranslations("admin");
+  const tOptions = useTranslations("options");
+  const tCard = useTranslations("listingCard");
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 sm:flex-row sm:items-center">
@@ -19,7 +24,7 @@ export default function AdminListingRow({ listing }: { listing: ListingCardData 
           <Image src={image} alt={listing.title} fill sizes="112px" className="object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-            No photo
+            {tCard("noPhoto")}
           </div>
         )}
       </div>
@@ -32,12 +37,12 @@ export default function AdminListingRow({ listing }: { listing: ListingCardData 
           <StatusBadge status={listing.status} />
           {listing.featured && (
             <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-              Featured
+              {t("featured")}
             </span>
           )}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          {propertyTypeLabel(listing.propertyType)} · {cityLabel(listing.city)} ·{" "}
+          {tOptions(`propertyType.${listing.propertyType}`)} · {cityLabel(listing.city, locale)} ·{" "}
           {formatPrice(listing.price, listing.currency)}
         </p>
       </div>
@@ -50,7 +55,7 @@ export default function AdminListingRow({ listing }: { listing: ListingCardData 
             onClick={() => startTransition(() => setListingStatusAction(listing.id, "APPROVED"))}
             className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
           >
-            Approve
+            {t("approve")}
           </button>
         )}
         {listing.status !== "REJECTED" && (
@@ -60,7 +65,7 @@ export default function AdminListingRow({ listing }: { listing: ListingCardData 
             onClick={() => startTransition(() => setListingStatusAction(listing.id, "REJECTED"))}
             className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
           >
-            Reject
+            {t("reject")}
           </button>
         )}
         <button
@@ -69,7 +74,7 @@ export default function AdminListingRow({ listing }: { listing: ListingCardData 
           onClick={() => startTransition(() => toggleFeaturedAction(listing.id, !listing.featured))}
           className="rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-60"
         >
-          {listing.featured ? "Unfeature" : "Feature"}
+          {listing.featured ? t("unfeature") : t("feature")}
         </button>
       </div>
     </div>

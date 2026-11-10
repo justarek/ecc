@@ -40,6 +40,8 @@ export const listingSchema = z.object({
   compound: z.string().trim().max(120).optional().or(z.literal("")),
   address: z.string().trim().max(300).optional().or(z.literal("")),
   amenities: z.array(z.string()).optional().default([]),
+  latitude: z.coerce.number().min(-90).max(90).optional().nullable(),
+  longitude: z.coerce.number().min(-180).max(180).optional().nullable(),
 });
 
 export const inquirySchema = z.object({

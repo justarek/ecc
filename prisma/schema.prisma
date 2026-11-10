@@ -6,11 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
-// SQLite has no native enum type; Prisma stores these as TEXT.
-// Valid values are enforced in application code (see src/lib/constants.ts).
+// Category/propertyType/purpose/status/role are kept as TEXT rather than
+// native Postgres enums so the allowed value set (see src/lib/constants.ts)
+// can grow without a migration.
 
 model User {
   id           String   @id @default(cuid())
@@ -49,7 +50,7 @@ model Listing {
   latitude   Float?
   longitude  Float?
 
-  amenities  String? // comma-separated list
+  amenities  String[] @default([])
 
   featured   Boolean  @default(false)
   views      Int      @default(0)

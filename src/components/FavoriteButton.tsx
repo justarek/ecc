@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toggleFavoriteAction } from "@/app/actions/favorites";
 
 export default function FavoriteButton({
@@ -18,6 +19,7 @@ export default function FavoriteButton({
   const [favorited, setFavorited] = useState(initialFavorited);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("listingDetail");
 
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -52,7 +54,7 @@ export default function FavoriteButton({
         }`}
       >
         <span>{favorited ? "♥" : "♡"}</span>
-        {favorited ? "Saved" : "Save"}
+        {favorited ? t("saved") : t("save")}
       </button>
     );
   }
@@ -62,7 +64,7 @@ export default function FavoriteButton({
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+      aria-label={favorited ? t("removeFromFavorites") : t("addToFavorites")}
       className={`flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition-colors hover:bg-white ${
         favorited ? "text-primary" : "text-foreground/70"
       }`}

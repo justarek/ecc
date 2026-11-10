@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 import type { ListingCardData } from "@/lib/listings";
-import { cityLabel, formatArea, formatPrice, propertyTypeLabel } from "@/lib/constants";
+import { cityLabel, formatArea, formatPrice } from "@/lib/constants";
 import FavoriteButton from "./FavoriteButton";
 
 export default function ListingCard({
@@ -14,6 +15,9 @@ export default function ListingCard({
   isLoggedIn?: boolean;
 }) {
   const image = listing.images[0]?.url;
+  const locale = useLocale();
+  const t = useTranslations("listingCard");
+  const tOptions = useTranslations("options");
 
   return (
     <Link
@@ -31,17 +35,17 @@ export default function ListingCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            No photo
+            {t("noPhoto")}
           </div>
         )}
 
         <div className="absolute left-3 top-3 flex gap-2">
           <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
-            {listing.purpose === "SALE" ? "For Sale" : "For Rent"}
+            {listing.purpose === "SALE" ? t("forSale") : t("forRent")}
           </span>
           {listing.featured && (
             <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
-              Featured
+              {t("featured")}
             </span>
           )}
         </div>
@@ -59,21 +63,25 @@ export default function ListingCard({
         <p className="text-lg font-bold text-foreground">
           {formatPrice(listing.price, listing.currency)}
           {listing.purpose === "RENT" && (
-            <span className="text-sm font-normal text-muted-foreground"> /month</span>
+            <span className="text-sm font-normal text-muted-foreground"> {t("perMonth")}</span>
           )}
         </p>
         <h3 className="line-clamp-2 text-sm font-medium text-foreground/90">{listing.title}</h3>
         <p className="text-xs text-muted-foreground">
-          {propertyTypeLabel(listing.propertyType)} · {cityLabel(listing.city)}
+          {tOptions(`propertyType.${listing.propertyType}`)} · {cityLabel(listing.city, locale)}
         </p>
 
         <div className="mt-auto flex items-center gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
           <span>{formatArea(listing.area)}</span>
           {listing.bedrooms !== null && listing.bedrooms !== undefined && (
-            <span>{listing.bedrooms} bed</span>
+            <span>
+              {listing.bedrooms} {t("bed")}
+            </span>
           )}
           {listing.bathrooms !== null && listing.bathrooms !== undefined && (
-            <span>{listing.bathrooms} bath</span>
+            <span>
+              {listing.bathrooms} {t("bath")}
+            </span>
           )}
         </div>
       </div>

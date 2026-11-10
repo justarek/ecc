@@ -1,10 +1,9 @@
 import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { CITIES as CITY_LIST } from "../src/lib/constants";
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./dev.db",
-});
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 const IMAGE_POOL = [
@@ -41,6 +40,10 @@ const CITIES = [
   "new-mansoura",
   "new-obour",
 ];
+
+function jitterCoordinate(base: number) {
+  return base + (Math.random() - 0.5) * 0.06; // ~± a few km
+}
 
 const UNIT_TYPES = [
   "APARTMENT",
@@ -95,7 +98,7 @@ const AMENITY_POOL = [
 
 function amenitiesFor() {
   const shuffled = [...AMENITY_POOL].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 3 + Math.floor(Math.random() * 5)).join(",");
+  return shuffled.slice(0, 3 + Math.floor(Math.random() * 5));
 }
 
 async function main() {
@@ -170,6 +173,7 @@ async function main() {
     const category = isLand ? "LAND" : "UNIT";
     const propertyType = isLand ? pick(LAND_TYPES) : pick(UNIT_TYPES);
     const city = pick(CITIES);
+    const cityCenter = CITY_LIST.find((c) => c.slug === city);
     const purpose = Math.random() > 0.25 ? "SALE" : "RENT";
     const owner = pick(owners);
     const compound = isLand ? null : pick(COMPOUNDS);
@@ -212,7 +216,9 @@ async function main() {
         district: compound ?? undefined,
         compound: compound ?? undefined,
         address: `Plot near main gate, ${city.replace(/-/g, " ")}`,
-        amenities: isLand ? undefined : amenitiesFor(),
+        latitude: cityCenter ? jitterCoordinate(cityCenter.lat) : null,
+        longitude: cityCenter ? jitterCoordinate(cityCenter.lng) : null,
+        amenities: isLand ? [] : amenitiesFor(),
         featured: i % 7 === 0,
         views: Math.floor(Math.random() * 500),
         userId: owner.id,

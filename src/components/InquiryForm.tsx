@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { sendInquiryAction, type InquiryActionState } from "@/app/actions/inquiries";
 import type { CurrentUser } from "@/lib/auth";
 
@@ -15,11 +16,12 @@ export default function InquiryForm({
     sendInquiryAction,
     null
   );
+  const t = useTranslations("inquiryForm");
 
   if (state?.success) {
     return (
       <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">
-        Thanks! Your message has been sent. The lister will contact you soon.
+        {t("thankYou")}
       </div>
     );
   }
@@ -35,7 +37,7 @@ export default function InquiryForm({
       <div>
         <input
           name="name"
-          placeholder="Your name"
+          placeholder={t("namePlaceholder")}
           defaultValue={user?.name ?? ""}
           required
           className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
@@ -48,7 +50,7 @@ export default function InquiryForm({
       <div>
         <input
           name="phone"
-          placeholder="Phone number"
+          placeholder={t("phonePlaceholder")}
           defaultValue={user?.phone ?? ""}
           required
           className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
@@ -62,7 +64,7 @@ export default function InquiryForm({
         <input
           name="email"
           type="email"
-          placeholder="Email (optional)"
+          placeholder={t("emailPlaceholder")}
           defaultValue={user?.email ?? ""}
           className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
         />
@@ -74,10 +76,10 @@ export default function InquiryForm({
       <div>
         <textarea
           name="message"
-          placeholder="I'm interested in this property..."
+          placeholder={t("messagePlaceholder")}
           rows={3}
           required
-          defaultValue="I'm interested in this property. Please contact me with more details."
+          defaultValue={t("defaultMessage")}
           className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
         />
         {state?.fieldErrors?.message && (
@@ -90,7 +92,7 @@ export default function InquiryForm({
         disabled={pending}
         className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-dark disabled:opacity-60"
       >
-        {pending ? "Sending..." : "Send message"}
+        {pending ? t("sending") : t("send")}
       </button>
     </form>
   );

@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { CATEGORIES, CITIES, PROPERTY_TYPES, PURPOSES } from "@/lib/constants";
 import type { ListingFilters } from "@/lib/listings";
 
 export default function FilterSidebar({ filters }: { filters: ListingFilters }) {
+  const t = useTranslations("filters");
+  const tOptions = useTranslations("options");
+  const locale = useLocale();
+
   const propertyTypes = filters.category
     ? PROPERTY_TYPES.filter((t) => t.category === filters.category)
     : PROPERTY_TYPES;
@@ -16,7 +21,7 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
       {filters.q && <input type="hidden" name="q" value={filters.q} />}
 
       <div>
-        <h3 className="text-sm font-semibold text-foreground">Purpose</h3>
+        <h3 className="text-sm font-semibold text-foreground">{t("purpose")}</h3>
         <div className="mt-2 flex gap-2">
           {PURPOSES.map((p) => (
             <label
@@ -30,7 +35,7 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
                 defaultChecked={filters.purpose === p.value}
                 className="sr-only"
               />
-              {p.label}
+              {tOptions(`purpose.${p.value}`)}
             </label>
           ))}
           <label className="flex-1 cursor-pointer rounded-lg border border-border px-3 py-2 text-center text-xs font-medium has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary">
@@ -41,14 +46,14 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
               defaultChecked={!filters.purpose}
               className="sr-only"
             />
-            Any
+            {t("any")}
           </label>
         </div>
       </div>
 
       <div>
         <label htmlFor="category" className="text-sm font-semibold text-foreground">
-          Category
+          {t("category")}
         </label>
         <select
           id="category"
@@ -56,10 +61,10 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
           defaultValue={filters.category ?? ""}
           className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
         >
-          <option value="">Units or land</option>
+          <option value="">{t("allTypes")}</option>
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
-              {c.label}
+              {tOptions(`category.${c.value}`)}
             </option>
           ))}
         </select>
@@ -67,7 +72,7 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
 
       <div>
         <label htmlFor="propertyType" className="text-sm font-semibold text-foreground">
-          Property type
+          {t("propertyType")}
         </label>
         <select
           id="propertyType"
@@ -75,10 +80,10 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
           defaultValue={filters.propertyType ?? ""}
           className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
         >
-          <option value="">All types</option>
-          {propertyTypes.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
+          <option value="">{t("allTypes")}</option>
+          {propertyTypes.map((pt) => (
+            <option key={pt.value} value={pt.value}>
+              {tOptions(`propertyType.${pt.value}`)}
             </option>
           ))}
         </select>
@@ -86,7 +91,7 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
 
       <div>
         <label htmlFor="city" className="text-sm font-semibold text-foreground">
-          City
+          {t("city")}
         </label>
         <select
           id="city"
@@ -94,22 +99,22 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
           defaultValue={filters.city ?? ""}
           className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
         >
-          <option value="">All new cities</option>
+          <option value="">{t("allNewCities")}</option>
           {CITIES.map((c) => (
             <option key={c.slug} value={c.slug}>
-              {c.name}
+              {locale === "ar" ? c.nameAr : c.name}
             </option>
           ))}
         </select>
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-foreground">Price range (EGP)</h3>
+        <h3 className="text-sm font-semibold text-foreground">{t("priceRange")}</h3>
         <div className="mt-2 flex items-center gap-2">
           <input
             type="number"
             name="minPrice"
-            placeholder="Min"
+            placeholder={t("min")}
             defaultValue={filters.minPrice ?? ""}
             className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
           />
@@ -117,7 +122,7 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
           <input
             type="number"
             name="maxPrice"
-            placeholder="Max"
+            placeholder={t("max")}
             defaultValue={filters.maxPrice ?? ""}
             className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
           />
@@ -125,12 +130,12 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-foreground">Area (m²)</h3>
+        <h3 className="text-sm font-semibold text-foreground">{t("area")}</h3>
         <div className="mt-2 flex items-center gap-2">
           <input
             type="number"
             name="minArea"
-            placeholder="Min"
+            placeholder={t("min")}
             defaultValue={filters.minArea ?? ""}
             className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
           />
@@ -138,7 +143,7 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
           <input
             type="number"
             name="maxArea"
-            placeholder="Max"
+            placeholder={t("max")}
             defaultValue={filters.maxArea ?? ""}
             className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
           />
@@ -147,7 +152,7 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
 
       <div>
         <label htmlFor="bedrooms" className="text-sm font-semibold text-foreground">
-          Min. bedrooms
+          {t("minBedrooms")}
         </label>
         <select
           id="bedrooms"
@@ -155,7 +160,7 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
           defaultValue={filters.bedrooms ?? ""}
           className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
         >
-          <option value="">Any</option>
+          <option value="">{t("any")}</option>
           {[1, 2, 3, 4, 5].map((n) => (
             <option key={n} value={n}>
               {n}+
@@ -169,13 +174,13 @@ export default function FilterSidebar({ filters }: { filters: ListingFilters }) 
           type="submit"
           className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-dark"
         >
-          Apply filters
+          {t("applyFilters")}
         </button>
         <Link
           href="/listings"
           className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-surface-muted"
         >
-          Reset
+          {t("reset")}
         </Link>
       </div>
     </form>

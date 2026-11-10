@@ -1,47 +1,16 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser, requireUser } from "@/lib/auth";
 import { listingSchema } from "@/lib/validation";
+import { deleteUploadedImage, saveUploadedImages } from "@/lib/storage";
 
 export type ListingActionState = {
   error?: string;
   fieldErrors?: Record<string, string[]>;
 } | null;
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-
-async function saveUploadedImages(files: File[]): Promise<string[]> {
-  const valid = files.filter((f) => f.size > 0);
-  if (valid.length === 0) return [];
-
-  await mkdir(UPLOAD_DIR, { recursive: true });
-
-  const urls: string[] = [];
-  for (const file of valid) {
-    if (!ALLOWED_TYPES.has(file.type)) {
-      throw new Error(`Unsupported image type: ${file.type || "unknown"}`);
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      throw new Error("Each image must be smaller than 8MB.");
-    }
-
-    const ext = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
-    const filename = `${randomUUID()}.${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-    urls.push(`/uploads/${filename}`);
-  }
-
-  return urls;
-}
 
 function parseListingFormData(formData: FormData) {
   return listingSchema.safeParse({
@@ -61,6 +30,8 @@ function parseListingFormData(formData: FormData) {
     compound: formData.get("compound") || "",
     address: formData.get("address") || "",
     amenities: formData.getAll("amenities").map(String),
+    latitude: formData.get("latitude") || undefined,
+    longitude: formData.get("longitude") || undefined,
   });
 }
 
@@ -95,7 +66,7 @@ export async function createListingAction(
       district: district || null,
       compound: compound || null,
       address: address || null,
-      amenities: amenities.length > 0 ? amenities.join(",") : null,
+      amenities,
       userId: user.id,
       images: { create: imageUrls.map((url, position) => ({ url, position })) },
     },
@@ -141,7 +112,7 @@ export async function updateListingAction(
       district: district || null,
       compound: compound || null,
       address: address || null,
-      amenities: amenities.length > 0 ? amenities.join(",") : null,
+      amenities,
       status: user.role === "ADMIN" ? undefined : "PENDING",
       ...(imageUrls.length > 0
         ? {
@@ -165,12 +136,16 @@ export async function updateListingAction(
 export async function deleteListingAction(listingId: string) {
   const user = await requireUser();
 
-  const existing = await prisma.listing.findUnique({ where: { id: listingId } });
+  const existing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    include: { images: true },
+  });
   if (!existing || (existing.userId !== user.id && user.role !== "ADMIN")) {
     throw new Error("FORBIDDEN");
   }
 
   await prisma.listing.delete({ where: { id: listingId } });
+  await Promise.all(existing.images.map((img) => deleteUploadedImage(img.url)));
 
   revalidatePath("/listings");
   revalidatePath("/dashboard");
@@ -185,5 +160,6 @@ export async function deleteListingImageAction(imageId: string) {
   }
 
   await prisma.image.delete({ where: { id: imageId } });
+  await deleteUploadedImage(image.url);
   revalidatePath(`/listings/${image.listingId}`);
 }
